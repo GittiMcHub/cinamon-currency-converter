@@ -1,0 +1,92 @@
+{
+    "layout": {
+        "type": "layout",
+        "pages": ["pageSource", "pageFixed", "pageFields"],
+        "pageSource": {
+            "type": "page",
+            "title": "Rate source",
+            "sections": ["sectionMode", "sectionWeb"]
+        },
+        "pageFixed": {
+            "type": "page",
+            "title": "Fixed rates",
+            "sections": ["sectionFixed"]
+        },
+        "pageFields": {
+            "type": "page",
+            "title": "Fields",
+            "sections": ["sectionFields"]
+        },
+        "sectionMode": {
+            "type": "section",
+            "title": "Mode",
+            "keys": ["rateSource"]
+        },
+        "sectionWeb": {
+            "type": "section",
+            "title": "Web service",
+            "keys": ["apiBase", "baseCurrency", "cacheDuration", "refreshNow"]
+        },
+        "sectionFixed": {
+            "type": "section",
+            "title": "Local fixed rate table",
+            "keys": ["fixedRates"]
+        },
+        "sectionFields": {
+            "type": "section",
+            "title": "Conversion fields",
+            "keys": ["fields"]
+        }
+    },
+
+    "rateSource": {
+        "type": "radiogroup",
+        "default": "webservice",
+        "options": {
+            "Web service (online, cached)": "webservice",
+            "Fixed rates (offline table)": "fixed"
+        },
+        "description": "Where conversion rates come from"
+    },
+
+    "apiBase": {
+        "type": "entry",
+        "default": "https://api.frankfurter.app",
+        "description": "Web service base URL (Frankfurter-compatible /latest endpoint)"
+    },
+
+    "baseCurrency": {
+        "type": "entry",
+        "default": "EUR",
+        "description": "Base currency used to fetch and derive cross rates"
+    },
+
+    "cacheDuration": {
+        "type": "combobox",
+        "default": 43200,
+        "options": {
+            "1 hour": 3600,
+            "12 hours": 43200,
+            "24 hours": 86400
+        },
+        "description": "How long to reuse a fetched rate before refetching"
+    },
+
+    "refreshNow": {
+        "type": "button",
+        "description": "Refresh rates now",
+        "callback": "onRefreshClicked"
+    },
+
+    "fixedRates": {
+        "type": "textview",
+        "default": "[\n  { \"from\": \"EUR\", \"to\": \"DKK\", \"rate\": 7.4744 }\n]",
+        "description": "Fixed rates as JSON: [{\"from\":\"EUR\",\"to\":\"DKK\",\"rate\":7.4744}]. The reverse (DKK->EUR) is derived automatically."
+    },
+
+    "fields": {
+        "type": "textview",
+        "default": "[\n  { \"from\": \"EUR\", \"to\": \"DKK\" },\n  { \"from\": \"USD\", \"to\": \"EUR\" }\n]",
+        "description": "Input fields as JSON: [{\"from\":\"EUR\",\"to\":\"DKK\"}]. One live conversion row per entry."
+    }
+}

@@ -1,0 +1,8 @@
+{
+    "uuid": "cinamon-currency-converter@gittimchub.github.com",
+    "name": "Cinamon Currency Converter",
+    "description": "Convert currencies live on your desktop using a web service (with caching) or a local fixed-rate table.",
+    "version": "0.1",
+    "max-instances": 4,
+    "prevent-decorations": false
+}
