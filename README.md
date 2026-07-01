@@ -2,7 +2,8 @@
 
 A small Cinnamon **desklet** (Linux Mint 22, Cinnamon 6.x) for live currency
 conversion on the desktop. Type an amount, see the converted value as you type.
-Rates come from a web service (Frankfurter/ECB, cached) or a local fixed table.
+Rates come from []https://github.com/lineofflight/frankfurter](https://github.com/lineofflight/frankfurter) (Frankfurter/ECB, cached) or a local fixed table.
+
 
 ## Install
 

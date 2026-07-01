@@ -192,6 +192,9 @@ MyDesklet.prototype = {
         this.settings.bindProperty(bind, "apiBase", "apiBase", this._onSettingsChanged.bind(this));
         this.settings.bindProperty(bind, "baseCurrency", "baseCurrency", this._onSettingsChanged.bind(this));
         this.settings.bindProperty(bind, "cacheDuration", "cacheDuration", this._onSettingsChanged.bind(this));
+        this.settings.bindProperty(bind, "decimals", "decimals", this._onSettingsChanged.bind(this));
+        this.settings.bindProperty(bind, "decimalChar", "decimalChar", this._onSettingsChanged.bind(this));
+        this.settings.bindProperty(bind, "thousandsSep", "thousandsSep", this._onSettingsChanged.bind(this));
         this.settings.bindProperty(bind, "fixedRates", "fixedRates", this._onSettingsChanged.bind(this));
         this.settings.bindProperty(bind, "fields", "fields", this._onSettingsChanged.bind(this));
 
@@ -209,9 +212,22 @@ MyDesklet.prototype = {
     },
 
     _onSettingsChanged: function() {
+        this._enforceSeparators();
         this._buildProvider();
         this._buildUI();
         this._refreshRates(false);
+    },
+
+    // Decimal char and thousands separator must differ. Only "." vs "." can
+    // collide; if it happens, drop the thousands separator and persist it so
+    // the config UI reflects the correction.
+    _enforceSeparators: function() {
+        let dc = RateLib.resolveDecimalChar(this.decimalChar);
+        if (this.thousandsSep && this.thousandsSep !== "none" && this.thousandsSep === dc) {
+            _log("thousands separator equals decimal char — resetting to none");
+            this.settings.setValue("thousandsSep", "none");
+            this.thousandsSep = "none";
+        }
     },
 
     _parsedFixed: function() { return RateLib.parseJsonArray(this.fixedRates); },
@@ -352,13 +368,17 @@ MyDesklet.prototype = {
 
     _recalcRow: function(rowData) {
         // Empty field defaults to 1, so an untouched row shows the current rate.
-        let text = rowData.entry.get_text().trim().replace(",", ".");
-        if (text === "") text = "1";
+        let raw = rowData.entry.get_text().trim();
+        if (raw === "") raw = "1";
+
+        let amount = RateLib.parseAmount(raw, this.decimalChar, this.thousandsSep);
+        if (!isFinite(amount)) { rowData.output.set_text("—"); return; }
 
         let rate = this._provider ? this._provider.getRate(rowData.from, rowData.to) : null;
         if (rate === null) { rowData.output.set_text("?"); return; }
 
-        let result = RateLib.formatResult(text, rate);
+        let result = RateLib.formatNumber(
+            amount * rate, this.decimals, this.decimalChar, this.thousandsSep);
         rowData.output.set_text(result === null ? "—" : result);
     },
 

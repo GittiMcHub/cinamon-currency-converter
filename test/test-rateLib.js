@@ -59,11 +59,31 @@ eq(R.isCacheFresh(1000, 3600, 1000 + 3600), false, "stale at exactly duration");
 eq(R.isCacheFresh(NaN, 3600, 5000), false, "NaN timestamp = stale");
 
 // --- result formatting ---
-eq(R.formatResult("10", 7.4744), "74.74", "formats amount*rate to 2 decimals");
-eq(R.formatResult("1", 7.4744), "7.47", "rounds to 2 decimals");
-eq(R.formatResult("", 2), null, "empty amount -> null");
-eq(R.formatResult("abc", 2), null, "non-numeric -> null");
-eq(R.formatResult("5", null), null, "null rate -> null");
+eq(R.formatNumber(74.744, 2), "74.74", "2 decimals by default char");
+eq(R.formatNumber(7.4744, 4), "7.4744", "honours decimals arg");
+eq(R.formatNumber(7.4744, 0), "7", "0 decimals");
+eq(R.formatNumber(7.4744, 99), "7.4744000000", "clamps decimals to 10");
+eq(R.formatNumber(null, 2), null, "null value -> null");
+eq(R.formatNumber(-12.5, 2), "-12.50", "keeps sign");
+
+// decimal char
+eq(R.formatNumber(1234.5, 2, ","), "1234,50", "comma decimal char");
+eq(R.formatNumber(1234.5, 2, "."), "1234.50", "dot decimal char");
+
+// thousands separator
+eq(R.formatNumber(1234567.5, 2, ".", ","), "1,234,567.50", "comma grouping");
+eq(R.formatNumber(1234567.5, 2, ",", "."), "1.234.567,50", "European style");
+eq(R.formatNumber(1234567.5, 2, ".", "'"), "1'234'567.50", "Swiss apostrophe");
+eq(R.formatNumber(1234.5, 2, ".", "none"), "1234.50", "no grouping when none");
+// collision: same char for both -> grouping dropped, never duplicated
+eq(R.formatNumber(1234.5, 2, ".", "."), "1234.50", "collision drops grouping");
+
+// parsing honours separators
+eq(R.parseAmount("1,50", ","), 1.5, "parse comma decimal");
+eq(R.parseAmount("1.234,56", ",", "."), 1234.56, "parse European grouped");
+eq(R.parseAmount("1'234.56", ".", "'"), 1234.56, "parse Swiss grouped");
+eq(isNaN(R.parseAmount("", ".")), true, "empty -> NaN");
+eq(isNaN(R.parseAmount("abc", ".")), true, "junk -> NaN");
 
 console.log(pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

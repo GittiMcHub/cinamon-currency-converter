@@ -1,7 +1,7 @@
 {
     "layout": {
         "type": "layout",
-        "pages": ["pageSource", "pageFixed", "pageFields"],
+        "pages": ["pageSource", "pageFixed", "pageFields", "pageDisplay"],
         "pageSource": {
             "type": "page",
             "title": "Rate source",
@@ -17,6 +17,11 @@
             "title": "Fields",
             "sections": ["sectionFields"]
         },
+        "pageDisplay": {
+            "type": "page",
+            "title": "Display",
+            "sections": ["sectionDisplay"]
+        },
         "sectionMode": {
             "type": "section",
             "title": "Mode",
@@ -31,6 +36,11 @@
             "type": "section",
             "title": "Local fixed rate table",
             "keys": ["fixedRates"]
+        },
+        "sectionDisplay": {
+            "type": "section",
+            "title": "Display",
+            "keys": ["decimals", "decimalChar", "thousandsSep"]
         },
         "sectionFields": {
             "type": "section",
@@ -76,6 +86,37 @@
         "type": "button",
         "description": "Refresh rates now",
         "callback": "onRefreshClicked"
+    },
+
+    "decimals": {
+        "type": "spinbutton",
+        "default": 2,
+        "min": 0,
+        "max": 10,
+        "step": 1,
+        "units": "decimals",
+        "description": "Number of decimal places in the converted result"
+    },
+
+    "decimalChar": {
+        "type": "combobox",
+        "default": ".",
+        "options": {
+            "Dot  (1.50)": ".",
+            "Comma  (1,50)": ","
+        },
+        "description": "Decimal separator in the result"
+    },
+
+    "thousandsSep": {
+        "type": "combobox",
+        "default": "none",
+        "options": {
+            "None  (1234.50)": "none",
+            "Dot  (1.234)": ".",
+            "Apostrophe  (1'234)": "'"
+        },
+        "description": "Thousands separator in the result (must differ from the decimal separator; a conflicting choice is ignored)"
     },
 
     "fixedRates": {

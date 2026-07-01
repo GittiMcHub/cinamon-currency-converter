@@ -104,13 +104,57 @@ var isCacheFresh = function(fetchedAt, durationSec, now) {
     return (now - fetchedAt) < durationSec;
 };
 
-// Format a converted amount for display; "" for empty/invalid input.
-var formatResult = function(amount, rate) {
-    if (rate === null || rate === undefined) return null;
-    if (typeof amount === "string" && amount.trim() === "") return null;
-    var n = Number(amount);
-    if (!isFinite(n)) return null;
-    return (n * rate).toFixed(2);
+// Resolve a decimal-char setting to a single char (default ".").
+var resolveDecimalChar = function(dc) {
+    return dc === "," ? "," : ".";
+};
+
+// Resolve a thousands-separator setting ("" / "none" = no grouping). A
+// separator that would collide with the decimal char is dropped, so the two
+// can never be identical regardless of settings state.
+var resolveThousandsSep = function(ts, decimalChar) {
+    if (ts === undefined || ts === null || ts === "none" || ts === "") return "";
+    if (ts === decimalChar) return "";
+    return ts;
+};
+
+// Insert a thousands separator every three digits from the right.
+var groupThousands = function(intStr, sep) {
+    if (!sep) return intStr;
+    return intStr.replace(/\B(?=(\d{3})+(?!\d))/g, sep);
+};
+
+// Parse user input into a number, honouring the configured decimal char and
+// thousands separator. Returns NaN for empty/invalid input.
+var parseAmount = function(text, decimalChar, thousandsSep) {
+    if (typeof text !== "string") return NaN;
+    var t = text.trim();
+    if (t === "") return NaN;
+    var dc = resolveDecimalChar(decimalChar);
+    var ts = resolveThousandsSep(thousandsSep, dc);
+    if (ts) t = t.split(ts).join("");     // strip grouping
+    t = t.replace(/\s/g, "");             // strip stray spaces
+    if (dc !== ".") t = t.split(dc).join(".");
+    return Number(t);
+};
+
+// Format a numeric value for display with fixed decimals and the configured
+// separators. Returns null for null/non-finite input.
+var formatNumber = function(value, decimals, decimalChar, thousandsSep) {
+    if (value === null || value === undefined || !isFinite(value)) return null;
+    var d = Number(decimals);
+    if (!isFinite(d)) d = 2;
+    d = Math.max(0, Math.min(10, Math.round(d)));
+    var dc = resolveDecimalChar(decimalChar);
+    var ts = resolveThousandsSep(thousandsSep, dc);
+
+    var s = value.toFixed(d);
+    var neg = s.charAt(0) === "-";
+    if (neg) s = s.slice(1);
+    var parts = s.split(".");
+    var intPart = groupThousands(parts[0], ts);
+    var out = intPart + (d > 0 ? dc + parts[1] : "");
+    return (neg ? "-" : "") + out;
 };
 
 if (typeof module !== "undefined" && module.exports) {
@@ -125,6 +169,10 @@ if (typeof module !== "undefined" && module.exports) {
         parseJsonArray: parseJsonArray,
         collectCurrencies: collectCurrencies,
         isCacheFresh: isCacheFresh,
-        formatResult: formatResult
+        resolveDecimalChar: resolveDecimalChar,
+        resolveThousandsSep: resolveThousandsSep,
+        groupThousands: groupThousands,
+        parseAmount: parseAmount,
+        formatNumber: formatNumber
     };
 }
